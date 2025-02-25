@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пазл-игра</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        .puzzle-container { display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; justify-content: center; }
+        .piece { width: 100px; height: 100px; border: 1px solid black; background-size: cover; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Собери пазл</h2>
+    <div class="puzzle-container" id="puzzle"></div>
+    <button onclick="shuffle()">Перемешать</button>
+
+    <script>
+        const images = [
+            'https://source.unsplash.com/random/150x150?sig=1',
+            'https://source.unsplash.com/random/150x150?sig=2',
+            'https://source.unsplash.com/random/150x150?sig=3',
+            'https://source.unsplash.com/random/150x150?sig=4',
+            'https://source.unsplash.com/random/150x150?sig=5',
+            'https://source.unsplash.com/random/150x150?sig=6',
+            'https://source.unsplash.com/random/150x150?sig=7',
+            'https://source.unsplash.com/random/150x150?sig=8',
+            'https://source.unsplash.com/random/150x150?sig=9'
+        ];
+
+        function createPuzzle() {
+            const puzzle = document.getElementById("puzzle");
+            puzzle.innerHTML = "";
+            images.forEach((src, i) => {
+                const div = document.createElement("div");
+                div.classList.add("piece");
+                div.style.backgroundImage = `url(${src})`;
+                div.draggable = true;
+                div.dataset.index = i;
+                div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.dataset.index);
+                div.ondragover = (e) => e.preventDefault();
+                div.ondrop = (e) => {
+                    let fromIndex = e.dataTransfer.getData("text");
+                    let toIndex = e.target.dataset.index;
+                    [images[fromIndex], images[toIndex]] = [images[toIndex], images[fromIndex]];
+                    createPuzzle();
+                };
+                puzzle.appendChild(div);
+            });
+        }
+
+        function shuffle() {
+            images.sort(() => Math.random() - 0.5);
+            createPuzzle();
+        }
+
+        createPuzzle();
+    </script>
+</body>
+</html>
