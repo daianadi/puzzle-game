@@ -13,20 +13,21 @@
             background-color: #f0f0f0;
         }
         .puzzle-container {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-template-rows: repeat(3, 100px);
-            gap: 2px;
-            border: 2px solid #000;
             position: relative;
+            width: 306px;
+            height: 306px;
+            display: flex;
+            flex-wrap: wrap;
+            border: 2px solid black;
         }
         .puzzle-piece {
             width: 100px;
             height: 100px;
             background-size: 300px 300px;
             border: 1px solid #000;
-            cursor: grab;
             position: absolute;
+            cursor: grab;
+            user-select: none;
         }
     </style>
 </head>
@@ -37,7 +38,7 @@
     <script>
         const imageUrl = "https://github.com/daianadi/puzzle-game/raw/main/ec3s6y6os2ga1cargvg8.jpg";
         const container = document.getElementById("puzzleContainer");
-        const gridSize = 3; // 3x3 пазл
+        const gridSize = 3;
         let pieces = [];
 
         // Создаём кусочки пазла
@@ -50,56 +51,43 @@
                 piece.style.left = `${col * 102}px`;
                 piece.style.top = `${row * 102}px`;
                 piece.dataset.index = row * gridSize + col;
-                piece.draggable = true;
                 pieces.push(piece);
+                container.appendChild(piece);
             }
         }
 
-        // Перемешиваем кусочки случайным образом
+        // Перемешиваем кусочки
         pieces.sort(() => Math.random() - 0.5);
         pieces.forEach(piece => container.appendChild(piece));
 
-        let draggedPiece = null;
-        let draggedIndex = null;
+        let selectedPiece = null;
+        let offsetX, offsetY;
 
-        // Начало перетаскивания
+        // Обработчик нажатия
         pieces.forEach(piece => {
-            piece.addEventListener("dragstart", (e) => {
-                draggedPiece = piece;
-                draggedIndex = pieces.indexOf(piece);
-                setTimeout(() => (piece.style.opacity = "0.5"), 0);
-            });
-
-            // Окончание перетаскивания
-            piece.addEventListener("dragend", () => {
-                draggedPiece.style.opacity = "1";
-                draggedPiece = null;
-                draggedIndex = null;
-            });
-
-            // Разрешаем бросать элементы
-            piece.addEventListener("dragover", (e) => e.preventDefault());
-
-            // Меняем местами кусочки при отпускании
-            piece.addEventListener("drop", (e) => {
-                e.preventDefault();
-                let droppedIndex = pieces.indexOf(e.target);
-
-                if (draggedIndex !== droppedIndex) {
-                    // Меняем местами позиции элементов
-                    let tempLeft = draggedPiece.style.left;
-                    let tempTop = draggedPiece.style.top;
-                    draggedPiece.style.left = e.target.style.left;
-                    draggedPiece.style.top = e.target.style.top;
-                    e.target.style.left = tempLeft;
-                    e.target.style.top = tempTop;
-
-                    // Меняем местами кусочки в массиве
-                    [pieces[draggedIndex], pieces[droppedIndex]] = [pieces[droppedIndex], pieces[draggedIndex]];
-                }
+            piece.addEventListener("mousedown", (e) => {
+                selectedPiece = e.target;
+                offsetX = e.clientX - selectedPiece.offsetLeft;
+                offsetY = e.clientY - selectedPiece.offsetTop;
+                selectedPiece.style.cursor = "grabbing";
             });
         });
 
+        // Обработчик движения мыши
+        document.addEventListener("mousemove", (e) => {
+            if (selectedPiece) {
+                selectedPiece.style.left = `${e.clientX - offsetX}px`;
+                selectedPiece.style.top = `${e.clientY - offsetY}px`;
+            }
+        });
+
+        // Отпускание элемента
+        document.addEventListener("mouseup", () => {
+            if (selectedPiece) {
+                selectedPiece.style.cursor = "grab";
+                selectedPiece = null;
+            }
+        });
     </script>
 
 </body>
