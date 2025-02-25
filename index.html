@@ -25,6 +25,13 @@
             background-size: 300px 300px;
             cursor: pointer;
             border: 1px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px black;
         }
     </style>
 </head>
@@ -37,17 +44,44 @@
         const container = document.getElementById("puzzleContainer");
 
         let pieces = [];
-        
+
+        // Создаём части пазла
         for (let i = 0; i < 9; i++) {
             let piece = document.createElement("div");
             piece.classList.add("puzzle-piece");
             piece.style.backgroundImage = `url(${imageUrl})`;
             piece.style.backgroundPosition = `${-(i % 3) * 100}px ${-Math.floor(i / 3) * 100}px`;
+            piece.dataset.index = i; // Запоминаем правильный порядок
             pieces.push(piece);
         }
 
+        // Перемешиваем кусочки случайным образом
         pieces = pieces.sort(() => Math.random() - 0.5);
         pieces.forEach(piece => container.appendChild(piece));
+
+        let selectedPiece = null;
+
+        // Функция обработки кликов по кусочкам
+        function swapPieces(piece) {
+            if (!selectedPiece) {
+                selectedPiece = piece;
+                piece.style.border = "2px solid red"; // Подсветка выбранного элемента
+            } else {
+                // Меняем местами фоновую картинку двух элементов
+                let tempBg = selectedPiece.style.backgroundPosition;
+                selectedPiece.style.backgroundPosition = piece.style.backgroundPosition;
+                piece.style.backgroundPosition = tempBg;
+
+                // Сбрасываем выбор
+                selectedPiece.style.border = "1px solid black";
+                selectedPiece = null;
+            }
+        }
+
+        // Добавляем обработчик событий на каждый кусочек пазла
+        pieces.forEach(piece => {
+            piece.addEventListener("click", () => swapPieces(piece));
+        });
     </script>
 
 </body>
